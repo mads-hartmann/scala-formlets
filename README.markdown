@@ -6,7 +6,8 @@ The Essence of Form Abstraction by
 Ezra Cooper, Sam Lindley, Philip Wadler, and Jeremy Yallop
 
 This file contains the very first parts of a Formlet implementation
-in Scala - I'm simply exploring the idea at the moment.
+in Scala - **It's not usable yet**; I'm simply exploring the idea 
+at the moment.
 
 A `Formlet[A]` represents a form that, when processed, yields a value
 of type A. Sort of. A Formlet is an applicative functor(*) so you
