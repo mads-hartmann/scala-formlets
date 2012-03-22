@@ -2,8 +2,8 @@
 
 Inspired by the paper 
 
-  The Essence of Form Abstraction by 
-  Ezra Cooper, Sam Lindley, Philip Wadler, and Jeremy Yallop
+The Essence of Form Abstraction by     
+Ezra Cooper, Sam Lindley, Philip Wadler, and Jeremy Yallop
 
 This file contains the very first parts of a Formlet implementation
 in Scala - I'm simply exploring the idea at the moment.
