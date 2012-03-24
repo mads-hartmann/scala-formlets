@@ -52,14 +52,10 @@ trait Formlet[A] {
     val (xml,  func,  names)  = this.value
     val (xml2, func2, names2) = x.value
 
-    // Fail fast - btw, where are the flatMap/map methods in Either? :-(
-    val f = (env: Env) => func2(env).fold(
-      (fail) => Left(fail),
-      (success) => func(env).fold(
-        (fail) => Left(fail),
-        (g) => Right(g(success))
-      )
-    )
+    val f = (env: Env) => for {
+      gFunc  <- func(env).right
+      gInput <- func2(env).right
+    } yield gFunc(gInput)
 
     new Formlet[Y] {
       val value = (xml ++ xml2, f, names ::: names2)
@@ -81,11 +77,11 @@ trait Formlet[A] {
    * TODO: Write documentation
    */
   def validate( f: A => Either[Error, A]) = {
+
     val (html, func, names) = this.value
-    val g = (env: Env) => func(env).fold(
-      (fail) => Left(fail),
-      (success) => f(success)
-    )
+
+    val g = (env: Env) => func(env).right.flatMap( f )
+
     new Formlet[A] {
       val value = (html, g,names)
     }
