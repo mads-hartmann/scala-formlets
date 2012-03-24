@@ -3,7 +3,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
-    
+
 		<title>code:app:0.1-SNAPSHOT</title>
     <lift:CSS.blueprint />
     <lift:CSS.fancyType />
@@ -21,7 +21,7 @@
 	padding:0;
 	border-bottom:1px solid #ccc;
 }
-	 
+
 
 .sidebar ul li {
 	margin:0;
@@ -63,24 +63,27 @@
 
       <div class="column span-6 colborder sidebar">
         <hr class="space" />
-        <lift:Menu.builder />	
+        <lift:Menu.builder />
+      </div>
+
+      <div class="column span-17 last">
+
         <div>
           <lift:msgs showAll="true"/>
           <hr class="space" />
         </div>
-      </div>
 
-      <div class="column span-17 last">
         <lift:bind name="content" />
+
       </div>
 
       <hr />
       <div class="column span-23 last" style="text-align: center">
         <h4 class="alt">
-          <a href="http://www.liftweb.net"><i>Lift</i></a> 
+          <a href="http://www.liftweb.net"><i>Lift</i></a>
 	        is Copyright 2007-2011 WorldWide Conferencing, LLC.  Distributed under an Apache 2.0 License.</h4>
       </div>
-      
+
     </div>
   </body>
 </html>
