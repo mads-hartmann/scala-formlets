@@ -21,7 +21,7 @@ String] => A`) - It is then up to you to use the markup to build the
 map that you pass to  the function - I will of course provide such a
 hook for Lift.
 
-See `Application.scala` for an example
+See `ExampleFormlet.scala` for an example
 
 (*) It's not a Monad because that would require that you could use the 
  result of a Formlet to build another Formlet - This of course isn't 
