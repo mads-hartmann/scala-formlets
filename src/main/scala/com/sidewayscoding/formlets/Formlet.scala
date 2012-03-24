@@ -76,13 +76,17 @@ trait Formlet[A] {
   /**
    * TODO: Write documentation
    */
-  def validate( f: A => Either[Error, A]) = {
+  def validate( f: A => Either[Error, A]) = transform(f)
 
+  /**
+   * TODO: Write documentation
+   */
+  def transform[B]( f: A => Either[Error, B]): Formlet[B] = {
     val (html, func, names) = this.value
 
     val g = (env: Env) => func(env).right.flatMap( f )
 
-    new Formlet[A] {
+    new Formlet[B] {
       val value = (html, g,names)
     }
   }

@@ -18,15 +18,23 @@ class ExampleFormlet {
     val mkPerson = (Person.apply _).curried
 
     val validateFirstname = (firstname: String) =>
-      if (firstname.size > 0) Right(firstname) else Left("Sorry, the name field is required")
+      if (firstname.size > 0) Right(firstname) else Left("Sorry, the Firstname field is required")
 
     val personForm =
       Formlet { mkPerson } <*>
       Formlet.input.withLabel("Firstname").validate(validateFirstname) <*>
       Formlet.input.withLabel("Lastname") <*>
-      (Formlet { (x: String) => Integer.parseInt(x) } <*> Formlet.input.withLabel("Age"))
+      Formlet.input.withLabel("Age").transform( toInt _ )
 
     "#myForm" #> personForm.process( (p: Person) => S.notice(p.toString) ).form
+  }
+
+  private def toInt(x: String): Either[String, Int] = {
+    try {
+      Right(Integer.parseInt(x))
+    } catch {
+      case e: Exception => Left("Please enter a valid integer")
+    }
   }
 
 }
