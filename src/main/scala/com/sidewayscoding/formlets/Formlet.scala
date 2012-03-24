@@ -66,6 +66,9 @@ trait Formlet[A] {
     }
   }
 
+  /**
+   * TODO: Write documentation
+   */
   def withLabel(text: String) = {
     val (xml, func, names) = this.value
     new Formlet[A] {
@@ -73,6 +76,25 @@ trait Formlet[A] {
         (<label>{text}</label> ++ xml, func, names)
     }
   }
+
+  /**
+   * TODO: Write documentation
+   */
+  def validate( f: A => Either[Error, A]) = {
+    val (html, func, names) = this.value
+    val g = (env: Env) => func(env).fold(
+      (fail) => Left(fail),
+      (success) => f(success)
+    )
+    new Formlet[A] {
+      val value = (html, g,names)
+    }
+  }
+
+  /**
+   * TODO: Write documentation
+   */
+  def process( f: A => Unit) = Formlet(f) <*> this
 
   /**
    * TODO: Write documentation
@@ -108,7 +130,9 @@ trait Formlet[A] {
     // Tell lift about the form handler
     S.addFunctionMap(name, collector)
 
-    <form> { html ++ <input type="submit" name={{name}} value="Submit" /> } </form>
+    <form>
+    { html ++ <input type="submit" name={{name}} value="Submit" /> }
+    </form>
   }
 
 }
@@ -144,6 +168,9 @@ object Formlet {
     }
   }
 
+  /**
+   * TODO: Write documentation
+   */
   def textarea = {
 
     val name = nextFuncName

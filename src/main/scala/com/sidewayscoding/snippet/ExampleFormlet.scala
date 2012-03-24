@@ -7,6 +7,8 @@ import common._
 import Helpers._
 import com.sidewayscoding.formlets.{ Formlet }
 
+import net.liftweb.http.{ S }
+
 class ExampleFormlet {
 
   def render = {
@@ -15,14 +17,16 @@ class ExampleFormlet {
 
     val mkPerson = (Person.apply _).curried
 
-    val personForm =
-      Formlet { (p: Person) => println("created person " + p) } <*>
-      (Formlet { mkPerson } <*>
-      Formlet.input.withLabel("Firstname") <*>
-      Formlet.input.withLabel("Lastname") <*>
-      (Formlet { (x: String) => Integer.parseInt(x) } <*> Formlet.input.withLabel("Age")))
+    val validateFirstname = (firstname: String) =>
+      if (firstname.size > 0) Right(firstname) else Left("Sorry, the name field is required")
 
-    "#myForm" #> personForm.form
+    val personForm =
+      Formlet { mkPerson } <*>
+      Formlet.input.withLabel("Firstname").validate(validateFirstname) <*>
+      Formlet.input.withLabel("Lastname") <*>
+      (Formlet { (x: String) => Integer.parseInt(x) } <*> Formlet.input.withLabel("Age"))
+
+    "#myForm" #> personForm.process( (p: Person) => S.notice(p.toString) ).form
   }
 
 }
