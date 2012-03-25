@@ -22,9 +22,9 @@ class ExampleFormlet {
 
     val personForm =
       Formlet { mkPerson } <*>
-      Formlet.input.withLabel("Firstname").validate(validateFirstname) <*>
-      Formlet.input.withLabel("Lastname") <*>
-      Formlet.input.withLabel("Age").transform( toInt _ )
+      Formlet.input.label("Firstname").validate(validateFirstname) <*>
+      Formlet.input.label("Lastname") <*>
+      Formlet.input.label("Age").transform( toInt _ )
 
     "#myForm" #> personForm.process( (p: Person) => S.notice(p.toString) ).form
   }

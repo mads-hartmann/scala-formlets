@@ -65,7 +65,7 @@ trait Formlet[A] {
   /**
    * TODO: Write documentation
    */
-  def withLabel(text: String) = {
+  def label(text: String) = {
     val (xml, func, names) = this.value
     new Formlet[A] {
       val value =
