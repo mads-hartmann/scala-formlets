@@ -11,7 +11,7 @@
   It differs from the the formlets described in the paper in
   the followings ways
 
-    - We don't have about name sources as Lift has built-in
+    - We don't care about name sources as Lift has built-in
       functionality for generating unique names for fields; This
       has the advantage of also being more safe against hackers etc.
 
@@ -182,6 +182,25 @@ object Formlet {
     new Formlet[String] {
       val value =
         (<textarea name={{ name }}></textarea>, func, List(name))
+    }
+  }
+
+  /**
+   * TODO: Write documentation
+   */
+  def checkbox: Formlet[Boolean] = {
+    val name = nextFuncName
+
+    val func = (env: Env) => {
+      env.get(name).map( Right(_) ).getOrElse( Right("off") )
+    }
+
+    (new Formlet[String] {
+      val value = (<input name={{ name }} type="checkbox"/>, func, List(name))
+    }) transform {
+      case "on" => Right(true)
+      case "off" => Right(false)
+      case str => Left("Got some invalid value. %s".format(str))
     }
   }
 

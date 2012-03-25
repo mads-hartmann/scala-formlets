@@ -13,7 +13,7 @@ class ExampleFormlet {
 
   def render = {
 
-    case class Person(firstname: String, lastname: String, age: Int)
+    case class Person(firstname: String, lastname: String, age: Int, agreed: Boolean)
 
     val mkPerson = (Person.apply _).curried
 
@@ -24,7 +24,8 @@ class ExampleFormlet {
       Formlet { mkPerson } <*>
       Formlet.input.label("Firstname").validate(validateFirstname) <*>
       Formlet.input.label("Lastname") <*>
-      Formlet.input.label("Age").transform( toInt _ )
+      Formlet.input.label("Age").transform( toInt _ ) <*>
+      Formlet.checkbox.label("Agree to some terms?")
 
     "#myForm" #> personForm.process( (p: Person) => S.notice(p.toString) ).form
   }
