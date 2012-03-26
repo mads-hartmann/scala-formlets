@@ -9,7 +9,7 @@ Ezra Cooper, Sam Lindley, Philip Wadler, and Jeremy Yallop
 [the paper](http://groups.inf.ed.ac.uk/links/papers/formlets-essence.pdf).
 
 This project contains the very first parts of a Formlet implementation
-in Scala for Lift-based web projects - It's not very usable yet; I'm
+in Scala for Lift-based web projects - **It's not very usable yet**; I'm
 simply exploring the idea at the moment
 
 If you want to try it out then create put the following in your
@@ -25,7 +25,5 @@ If you want to try it out then create put the following in your
     }
 
 See the [site](http://lift-formlets.mads379.cloudbees.net/) for examples
-and more information.
-
-[This](https://github.com/mads379/scala-formlets-example) is an example Lift
-project using the Formlets.
+and more information or [this](https://github.com/mads379/scala-formlets-example)
+is an example Lift project using the Formlets.
