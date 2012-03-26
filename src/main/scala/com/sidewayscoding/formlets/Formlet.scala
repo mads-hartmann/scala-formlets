@@ -131,7 +131,7 @@ trait Formlet[A] { that =>
     S.addFunctionMap(name, collector)
 
     <form>
-    { html ++ <input type="submit" name={{name}} value="Submit" /> }
+    { html ++ <button type="submit" class="btn" name={{name}}>Submit</button> }
     </form>
   }
 
@@ -200,6 +200,53 @@ object Formlet {
       case "on" => Right(true)
       case "off" => Right(false)
       case str => Left("Got some invalid value. %s".format(str))
+    }
+  }
+
+  /**
+   * TODO: Write documentation
+   */
+  def select(options: Map[String, String]) = new Formlet[String] {
+    val value = () => {
+
+      val name = nextFuncName
+
+      val func = (env: Env) => {
+        env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
+      }
+
+      val optionsHtml = options.map { case (key, value) =>
+        <option value={{key}}>{value}</option>
+      }
+
+      val html = <select name={{name}}> { optionsHtml } </select>
+
+      (html, func, List(name))
+
+    }
+  }
+
+  /**
+   * TODO: Write documentation
+   *
+   * Options is a list of tuples where the first component is the value
+   * assosiated with the radio button and the second is a label.
+   */
+  def radio(options: List[(String, String)]) = new Formlet[Option[String]] {
+    val value = () => {
+
+      val name = nextFuncName
+
+      val func = (env: Env) =>
+        env.get(name).map( x => Right(Some(x)) ).getOrElse( Right(None) )
+
+      val radioHtml = options.foldLeft (NodeSeq.Empty) { case (acc, (key, label)) =>
+        acc ++ (<label class="radio">
+          <input type="radio" name={{name}} value={{key}} />{label}
+        </label>)
+      }
+
+      (radioHtml, func, List(name))
     }
   }
 
