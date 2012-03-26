@@ -24,6 +24,5 @@ If you want to try it out then create put the following in your
       lazy val formlet = uri("git://github.com/mads379/scala-formlets#b8f704e758")
     }
 
-See the [site](http://lift-formlets.mads379.cloudbees.net/) for examples
-and more information or [this](https://github.com/mads379/scala-formlets-example)
-is an example Lift project using the Formlets.
+I have an example Lift project online [here](http://lift-formlets.mads379.cloudbees.net/)
+and the source is [here](https://github.com/mads379/scala-formlets-example)
