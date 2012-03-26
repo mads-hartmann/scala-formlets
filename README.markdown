@@ -26,3 +26,6 @@ If you want to try it out then create put the following in your
 
 See the [site](http://lift-formlets.mads379.cloudbees.net/) for examples
 and more information.
+
+[This](https://github.com/mads379/scala-formlets-example) is an example Lift
+project using the Formlets.
