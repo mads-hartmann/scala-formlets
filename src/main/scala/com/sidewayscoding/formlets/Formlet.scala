@@ -23,7 +23,9 @@
       fails.
 
   So rather than being a Int => (NodeSeq, Env => A, Int) we now have
-  (NodeSeq, Env => Either[Error, A], Names).
+  () => (NodeSeq, Env => Either[Error, A], Names). Notice that it still
+  has to be a function because we want to generate new unique names every
+  time the form is displayed, otherwise it wouldn't be safe against hackers.
 
 */
 
@@ -38,38 +40,38 @@ import net.liftweb.common.{ Box }
 /**
  * TODO: Write documentation
  */
-trait Formlet[A] {
+trait Formlet[A] { that =>
 
   import Formlet.{ Env, Names, Error }
 
-  val value: (NodeSeq, Env => Either[Error, A], Names)
+  val value: () => (NodeSeq, Env => Either[Error, A], Names)
 
   /**
    * TODO: Write documentation
    */
-  def <*>[X,Y](x: Formlet[X])(implicit ev: A <:< (X => Y)) = {
+  def <*>[X,Y](x: Formlet[X])(implicit ev: A <:< (X => Y)) = new Formlet[Y] {
+    val value = () => {
 
-    val (xml,  func,  names)  = this.value
-    val (xml2, func2, names2) = x.value
+      val (xml,  func,  names)  = that.value()
+      val (xml2, func2, names2) = x.value()
 
-    val f = (env: Env) => for {
-      gFunc  <- func(env).right
-      gInput <- func2(env).right
-    } yield gFunc(gInput)
+      val f = (env: Env) => for {
+        gFunc  <- func(env).right
+        gInput <- func2(env).right
+      } yield gFunc(gInput)
 
-    new Formlet[Y] {
-      val value = (xml ++ xml2, f, names ::: names2)
+      (xml ++ xml2, f, names ::: names2)
     }
+
   }
 
   /**
    * TODO: Write documentation
    */
-  def label(text: String) = {
-    val (xml, func, names) = this.value
-    new Formlet[A] {
-      val value =
-        (<label>{text}</label> ++ xml, func, names)
+  def label(text: String) = new Formlet[A] {
+    val value = () => {
+      val (xml, func, names) = that.value()
+      (<label>{text}</label> ++ xml, func, names)
     }
   }
 
@@ -81,13 +83,11 @@ trait Formlet[A] {
   /**
    * TODO: Write documentation
    */
-  def transform[B]( f: A => Either[Error, B]): Formlet[B] = {
-    val (html, func, names) = this.value
-
-    val g = (env: Env) => func(env).right.flatMap( f )
-
-    new Formlet[B] {
-      val value = (html, g,names)
+  def transform[B]( f: A => Either[Error, B]) = new Formlet[B] {
+    val value = () => {
+      val (html, func, names) = that.value()
+      val g = (env: Env) => func(env).right.flatMap( f )
+      (html, g, names)
     }
   }
 
@@ -101,7 +101,7 @@ trait Formlet[A] {
    */
   def form: NodeSeq = {
 
-    val (html, func, names) = this.value
+    val (html, func, names) = this.value()
 
     val name = nextFuncName
 
@@ -146,42 +146,37 @@ object Formlet {
   type Names = List[String]
   type Error = String
 
-  def apply[A](a: A): Formlet[A] = {
-    new Formlet[A] {
-       val value = (NodeSeq.Empty, (_: Env) => Right(a), Nil)
-    }
+  def apply[A](a: A): Formlet[A] = new Formlet[A] {
+    val value = () => (NodeSeq.Empty, (_: Env) => Right(a), Nil)
   }
 
   /**
    * Creates an input field of type text
    */
-  def input = {
-    new Formlet[String] {
-
+  def input = new Formlet[String] {
+    val value = () => {
       val name = nextFuncName
 
       val func = (env: Env) => {
         env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
       }
 
-      val value = (<input name={{ name }} type="text"/>, func, List(name))
+      (<input name={{ name }} type="text"/>, func, List(name))
     }
   }
 
   /**
    * TODO: Write documentation
    */
-  def textarea = {
+  def textarea = new Formlet[String] {
+    val value = () => {
+      val name = nextFuncName
 
-    val name = nextFuncName
+      val func = (env: Env) => {
+        env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
+      }
 
-    val func = (env: Env) => {
-      env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
-    }
-
-    new Formlet[String] {
-      val value =
-        (<textarea name={{ name }}></textarea>, func, List(name))
+      (<textarea name={{ name }}></textarea>, func, List(name))
     }
   }
 
@@ -189,14 +184,18 @@ object Formlet {
    * TODO: Write documentation
    */
   def checkbox: Formlet[Boolean] = {
-    val name = nextFuncName
-
-    val func = (env: Env) => {
-      env.get(name).map( Right(_) ).getOrElse( Right("off") )
-    }
 
     (new Formlet[String] {
-      val value = (<input name={{ name }} type="checkbox"/>, func, List(name))
+      val value = () => {
+
+        val name = nextFuncName
+
+        val func = (env: Env) => {
+          env.get(name).map( Right(_) ).getOrElse( Right("off") )
+        }
+
+        (<input name={{ name }} type="checkbox"/>, func, List(name))
+      }
     }) transform {
       case "on" => Right(true)
       case "off" => Right(false)
