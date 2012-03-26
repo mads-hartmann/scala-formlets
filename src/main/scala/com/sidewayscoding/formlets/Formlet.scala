@@ -183,23 +183,17 @@ object Formlet {
   /**
    * TODO: Write documentation
    */
-  def checkbox: Formlet[Boolean] = {
+  def checkbox: Formlet[Boolean] = new Formlet[Boolean] {
+    val value = () => {
 
-    (new Formlet[String] {
-      val value = () => {
+      val name = nextFuncName
 
-        val name = nextFuncName
-
-        val func = (env: Env) => {
-          env.get(name).map( Right(_) ).getOrElse( Right("off") )
-        }
-
-        (<input name={{ name }} type="checkbox"/>, func, List(name))
+      val func = (env: Env) => {
+        // If a checkbox isn't checked it doesn't show up in S.param
+        env.get(name).map( _ => Right(true) ).getOrElse( Right(false) )
       }
-    }) transform {
-      case "on" => Right(true)
-      case "off" => Right(false)
-      case str => Left("Got some invalid value. %s".format(str))
+
+      (<input name={{ name }} type="checkbox"/>, func, List(name))
     }
   }
 
