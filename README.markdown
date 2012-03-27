@@ -17,7 +17,7 @@ If you want to try it out then create put the following in your
 
     import sbt._
 
-    object Visoble extends Build {
+    object MyProject extends Build {
 
       lazy val root = Project("project", file(".")) dependsOn(formlet)
 
