@@ -21,7 +21,7 @@ If you want to try it out then create put the following in your
 
       lazy val root = Project("project", file(".")) dependsOn(formlet)
 
-      lazy val formlet = uri("git://github.com/mads379/scala-formlets#b8f704e758")
+      lazy val formlet = uri("git://github.com/mads379/scala-formlets")
     }
 
 I have an example Lift project online [here](http://lift-formlets.mads379.cloudbees.net/)
