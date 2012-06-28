@@ -30,7 +30,12 @@
 
 package com.sidewayscoding.formlets
 
-import scala.xml.{ NodeSeq }
+import scala.annotation.implicitNotFound
+import scala.xml.NodeSeq
+
+import Types.Env
+import Types.Error
+import Types.Names
 
 object Types {
   type Env = Map[String, String]
@@ -78,10 +83,13 @@ trait Formlet[A] { that =>
   val config: FormletConfig
   val value: () => (NodeSeq, Env => Either[Error, A], Names)
   
-  private lazy val formName = this.config.nameProvider.uniqueName()
+  private lazy val formName = that.config.nameProvider.uniqueName()
   
+  // TODO: Can I fix this in some way that doesn't require this inner formlet to pass
+  //       down the configuration? Using the Reader Monad is tempting but I don't know
+  //       how well it works inside an applicative functor.  
   private trait InnerFormlet[A] extends Formlet[A] { 
-    val config: FormletConfig = config
+    val config: FormletConfig = that.config
   }
 
   /**
@@ -103,7 +111,7 @@ trait Formlet[A] { that =>
   }
 
   /**
-   * TODO: Write documentation
+   * Prepends a label tag before the formlet's xhtml.
    */
   def label(text: String): Formlet[A] = new InnerFormlet[A] {
     val value = () => {
@@ -113,18 +121,19 @@ trait Formlet[A] { that =>
   }
 
   /**
-   * TODO: Write documentation
+   * Validate the value passed to the formlet. Return None if it is a valid 
+   * value, otherwise Some[Error]. 
    */
-  def validate( f: A => Either[Error, A]): Formlet[A] = new InnerFormlet[A] {
+  def validate( f: A => Option[Error]): Formlet[A] = new InnerFormlet[A] {
     val value = () => {
       val (html, func, names) = that.value()
-      val g = (env: Env) => func(env).right.flatMap( f )
+      val g = (env: Env) => func(env).right.flatMap( v => f(v).map(Left(_)).getOrElse(Right(v)) )
       (html, g, names)
     }
   }
   
   /**
-   * Map over the value extracted by the formlet.
+   * Map over the value passed to the formlet.
    */
   def map[B]( f: A => B): Formlet[B] = new InnerFormlet[B] {
     val value = () => {
@@ -135,14 +144,7 @@ trait Formlet[A] { that =>
   }
 
   /**
-   * TODO: Write documentation
-   */
-  def process( f: A => Unit): Unit = (new InnerFormlet[A => Unit] {
-    val value = () => (NodeSeq.Empty, (_: Env) => Right(f), Nil)
-  }) <*> this
-
-  /**
-   * TODO: Write documentation
+   * The xhtml representation of the formlet.
    */
   def xhtml: NodeSeq = {
 
@@ -200,7 +202,7 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * TODO: Write documentation
+   * Creates a textarea input field
    */
   def textarea: Formlet[String] = new InnerFormlet[String] {
     val value = () => {
@@ -215,7 +217,7 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * TODO: Write documentation
+   * Creates a checkbox input field
    */
   def checkbox: Formlet[Boolean] = new InnerFormlet[Boolean] {
     val value = () => {
@@ -232,9 +234,10 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * TODO: Write documentation
+   * Creates a select input field. 'options' is a list of tuples where the first 
+   * component is the value associated with the option and the second is the label.
    */
-  def select(options: Map[String, String]): Formlet[String] = new InnerFormlet[String] {
+  def select(options: List[(String, String)]): Formlet[String] = new InnerFormlet[String] {
     val value = () => {
 
       val name = config.nameProvider.uniqueName()
@@ -243,8 +246,8 @@ trait BaseFormlet { that =>
         env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
       }
 
-      val optionsHtml = options.map { case (key, value) =>
-        <option value={{key}}>{value}</option>
+      val optionsHtml = options.map { case (key, label) =>
+        <option value={{key}}>{label}</option>
       }
 
       val html = <select name={{name}}> { optionsHtml } </select>
@@ -255,8 +258,9 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * Options is a list of tuples where the first component is the value
-   * associated with the radio button and the second is a label.
+   * Creates a radio input field. 'options' is a list of tuples where the first 
+   * component is the value associated with the radio button and the second is 
+   * the label.
    */
   def radio(options: List[(String, String)]): Formlet[Option[String]] = new InnerFormlet[Option[String]] {
     val value = () => {
