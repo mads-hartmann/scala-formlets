@@ -6,6 +6,12 @@ scalacOptions += "-deprecation"
 
 scalacOptions += "-unchecked"
 
-resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
+resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+                  "releases"  at "http://oss.sonatype.org/content/repositories/releases",
+                  "Java.net Maven2 Repository" at "http://download.java.net/maven/2/")
 
 libraryDependencies += "net.liftweb" %% "lift-webkit" % "2.4-M5" % "compile->default"
+
+libraryDependencies += "org.specs2" %% "specs2" % "1.11" % "test"
+
+libraryDependencies += "junit" % "junit" % "4.10" % "test"
