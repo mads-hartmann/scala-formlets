@@ -1,6 +1,5 @@
 
-- Instead of using Either see if it isn't possible to use Box, more lift
-  like, you know.
+- Create a lift app just for running automated tests and hook it up to specs
 
 - Multiple submit buttons?
 
