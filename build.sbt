@@ -15,3 +15,5 @@ libraryDependencies += "net.liftweb" %% "lift-webkit" % "2.4-M5" % "compile->def
 libraryDependencies += "org.specs2" %% "specs2" % "1.11" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.10" % "test"
+
+libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.26" % "test"
