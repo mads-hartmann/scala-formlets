@@ -55,7 +55,7 @@ trait HandlerRegister {
   def addHandler(name: String, f: () => Unit): Unit
 }
 
-trait FormletConfig { 
+trait FormletConfig {
   val nameProvider: NameProvider
   val handlerRegister: HandlerRegister
   val environmentProducer: EnvironmentProducer
@@ -63,14 +63,14 @@ trait FormletConfig {
 
 trait EnvironmentProducer {
   import Types.{ Env, Names}
-  
+
   /**
    * Given the names used for the input elements construct the
    * environment. This is of course only possible when dealing
    * with the POST request produced by executing the form produced
-   * by the formlet.  
+   * by the formlet.
    */
-  def createEnviornment(names: Names): Env 
+  def createEnviornment(names: Names): Env
 }
 
 /**
@@ -79,16 +79,16 @@ trait EnvironmentProducer {
 trait Formlet[A] { that =>
 
   import Types.{ Env, Names, Error }
-  
+
   val config: FormletConfig
   val value: () => (NodeSeq, Env => Either[Error, A], Names)
-  
+
   private lazy val formName = that.config.nameProvider.uniqueName()
-  
+
   // TODO: Can I fix this in some way that doesn't require this inner formlet to pass
   //       down the configuration? Using the Reader Monad is tempting but I don't know
-  //       how well it works inside an applicative functor.  
-  private trait InnerFormlet[A] extends Formlet[A] { 
+  //       how well it works inside an applicative functor.
+  private trait InnerFormlet[A] extends Formlet[A] {
     val config: FormletConfig = that.config
   }
 
@@ -121,8 +121,8 @@ trait Formlet[A] { that =>
   }
 
   /**
-   * Validate the value passed to the formlet. Return None if it is a valid 
-   * value, otherwise Some[Error]. 
+   * Validate the value passed to the formlet. Return None if it is a valid
+   * value, otherwise Some[Error].
    */
   def validate( f: A => Option[Error]): Formlet[A] = new InnerFormlet[A] {
     val value = () => {
@@ -131,7 +131,7 @@ trait Formlet[A] { that =>
       (html, g, names)
     }
   }
-  
+
   /**
    * Map over the value passed to the formlet.
    */
@@ -156,13 +156,13 @@ trait Formlet[A] { that =>
   }
 
   /**
-   * Register a handler that will get executed when the form is 
+   * Register a handler that will get executed when the form is
    * submitted.
    */
   def handler(f: Either[Error, A] => Unit) = {
-    
+
     val (html, func, names) = this.value()
-    
+
     config.handlerRegister.addHandler(this.formName, () => {
       val env = config.environmentProducer.createEnviornment(names)
       f(func(env))
@@ -172,16 +172,16 @@ trait Formlet[A] { that =>
 }
 
 /**
- * Mixin for an object that can create Formlets. 
+ * Mixin for an object that can create Formlets.
  */
-trait BaseFormlet { that => 
-  
+trait BaseFormlet { that =>
+
   import Types._
-  
+
   val config: FormletConfig
-  
+
   private trait InnerFormlet[A] extends Formlet[A] {
-    val config: FormletConfig = that.config 
+    val config: FormletConfig = that.config
   }
 
   def apply[A](a: A): Formlet[A] = new InnerFormlet[A] {
@@ -194,8 +194,9 @@ trait BaseFormlet { that =>
   def input: Formlet[String] = new InnerFormlet[String] {
     val value = () => {
       val name = this.config.nameProvider.uniqueName()
+      println("name for input is: " + name)
       val func = (env: Env) => {
-        env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
+        env.get(name).map( Right(_) ).getOrElse( Left("Missing input field: %s".format(name)) )
       }
       (<input name={{ name }} type="text"/>, func, List(name))
     }
@@ -209,7 +210,7 @@ trait BaseFormlet { that =>
       val name = config.nameProvider.uniqueName()
 
       val func = (env: Env) => {
-        env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
+        env.get(name).map( Right(_) ).getOrElse( Left("Missing textarea: %s".format(name)) )
       }
 
       (<textarea name={{ name }}></textarea>, func, List(name))
@@ -234,7 +235,7 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * Creates a select input field. 'options' is a list of tuples where the first 
+   * Creates a select input field. 'options' is a list of tuples where the first
    * component is the value associated with the option and the second is the label.
    */
   def select(options: List[(String, String)]): Formlet[String] = new InnerFormlet[String] {
@@ -243,7 +244,7 @@ trait BaseFormlet { that =>
       val name = config.nameProvider.uniqueName()
 
       val func = (env: Env) => {
-        env.get(name).map( Right(_) ).getOrElse( Left("Missing field") )
+        env.get(name).map( Right(_) ).getOrElse( Left("Missing select field: %s".format(name)) )
       }
 
       val optionsHtml = options.map { case (key, label) =>
@@ -258,8 +259,8 @@ trait BaseFormlet { that =>
   }
 
   /**
-   * Creates a radio input field. 'options' is a list of tuples where the first 
-   * component is the value associated with the radio button and the second is 
+   * Creates a radio input field. 'options' is a list of tuples where the first
+   * component is the value associated with the radio button and the second is
    * the label.
    */
   def radio(options: List[(String, String)]): Formlet[Option[String]] = new InnerFormlet[Option[String]] {

@@ -6,3 +6,4 @@ target
 .DS_Store
 .cache
 .settings/
+.ensime_lucene/

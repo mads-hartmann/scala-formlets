@@ -1,14 +1,27 @@
 package com.sidewayscoding.formlets.lift.snippet
 
-import scala.xml.{NodeSeq, Text}
+import com.sidewayscoding.formlets.{Formlet, LiftFormlet}
+import net.liftweb.http.SessionVar
 import net.liftweb.util._
-import net.liftweb.common._
-import java.util.Date
-import Helpers._
+import net.liftweb.util.Helpers._
+
+case class Person(name: String, lastname: String)
+
+object Result extends SessionVar[Option[Person]](None)
 
 class HelloWorld {
 
+  val form: Formlet[Person] =
+    LiftFormlet( (Person.apply _).curried ) <*> LiftFormlet.input <*> LiftFormlet.input
+
+  form.handler {
+    case Left(err) => println(err) ; Result(None)
+    case Right(p)  => Result(Some(p))
+  }
+
   // replace the contents of the element with id "time" with the date
-  def howdy = "#time *" #> "time"
+  def howdy =
+    "#form" #> form.xhtml &
+    "#session" #> Result.is.toString
 
 }

@@ -10,9 +10,13 @@ Ezra Cooper, Sam Lindley, Philip Wadler, and Jeremy Yallop
 
 This project contains the very first parts of a Formlet implementation
 in Scala for Lift-based web projects - **It's not very usable yet**; I'm
-simply exploring the idea at the moment
+simply exploring the idea at the moment.
 
-If you want to try it out then create put the following in your
+## Using Formlets in your project
+
+Currently the artifacts aren't published anywhere at the momemt so if
+you want to try it out you have to depend on the source directly from
+this git repository. You can do so by putting the following in your
 `project/Build.scala` file.
 
     import sbt._
@@ -24,5 +28,12 @@ If you want to try it out then create put the following in your
       lazy val formlet = uri("git://github.com/mads379/scala-formlets")
     }
 
-I have an example Lift project online [here](http://lift-formlets.mads379.cloudbees.net/)
-and the source is [here](https://github.com/mads379/scala-formlets-example)
+## Working on the project
+
+### Lift implementation
+
+
+    > test:run
+
+Then select `com.sidewayscding.formlets.lift.RunWebApp` and point your
+browser to `http://localhost:8080`.

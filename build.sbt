@@ -10,7 +10,9 @@ resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/s
                   "releases"  at "http://oss.sonatype.org/content/repositories/releases",
                   "Java.net Maven2 Repository" at "http://download.java.net/maven/2/")
 
-libraryDependencies += "net.liftweb" %% "lift-webkit" % "2.4-M5" % "compile->default"
+libraryDependencies += "net.liftweb" %% "lift-webkit" % "2.5-SNAPSHOT" % "compile->default"
+
+libraryDependencies += "net.liftweb" %% "lift-testkit" % "2.5-SNAPSHOT" % "test"
 
 libraryDependencies += "org.specs2" %% "specs2" % "1.11" % "test"
 

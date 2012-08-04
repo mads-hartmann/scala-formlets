@@ -22,14 +22,15 @@ object LiftEnvironmentProducer extends EnvironmentProducer {
 
     val empty = Map[String, String]()
 
-    val mapping = names zip (names map { S.param _ })
+    val mapping: Seq[(String, Box[String])] =
+      names zip (names map { S.param _ })
 
-    val env = mapping.foldLeft(empty) {
-      case (map: Env, (key: String, box: Box[String])) =>
-        box map { value => map + (key -> value) } openOr map
+    println(mapping)
+
+    mapping.foldLeft(empty) {
+      case (e: Env, (key: String, box: Box[String])) =>
+        box map { value => e + (key -> value) } openOr e
     }
-
-    env
   }
 }
 
