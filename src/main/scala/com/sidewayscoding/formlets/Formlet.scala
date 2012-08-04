@@ -114,7 +114,7 @@ trait Formlet[A] { that =>
    * Prepends a label tag before the formlet's xhtml.
    */
   def label(text: String): Formlet[A] = new InnerFormlet[A] {
-    val value = () => {
+    lazy val value = {
       val (xml, func, names) = that.value
       (<label>{text}</label> ++ xml, func, names)
     }
@@ -125,7 +125,7 @@ trait Formlet[A] { that =>
    * value, otherwise Some[Error].
    */
   def validate( f: A => Option[Error]): Formlet[A] = new InnerFormlet[A] {
-    val value = () => {
+    lazy val value = {
       val (html, func, names) = that.value
       val g = (env: Env) => func(env).right.flatMap( v => f(v).map(Left(_)).getOrElse(Right(v)) )
       (html, g, names)
@@ -136,7 +136,7 @@ trait Formlet[A] { that =>
    * Map over the value passed to the formlet.
    */
   def map[B]( f: A => B): Formlet[B] = new InnerFormlet[B] {
-    val value = () => {
+    lazy val value = {
       val (html, func, names) = that.value
       val g = (env: Env) => func(env).right.map(f)
       (html, g, names)
@@ -185,14 +185,14 @@ trait BaseFormlet { that =>
   }
 
   def apply[A](a: A): Formlet[A] = new InnerFormlet[A] {
-    val value = () => (NodeSeq.Empty, (_: Env) => Right(a), Nil)
+    lazy val value = (NodeSeq.Empty, (_: Env) => Right(a), Nil)
   }
 
   /**
    * Creates an input field of type text
    */
   def input: Formlet[String] = new InnerFormlet[String] {
-    val value = () => {
+    lazy val value = {
       val name = this.config.nameProvider.uniqueName()
       println("name for input is: " + name)
       val func = (env: Env) => {
@@ -206,7 +206,7 @@ trait BaseFormlet { that =>
    * Creates a textarea input field
    */
   def textarea: Formlet[String] = new InnerFormlet[String] {
-    val value = () => {
+    lazy val value = {
       val name = config.nameProvider.uniqueName()
 
       val func = (env: Env) => {
@@ -221,7 +221,7 @@ trait BaseFormlet { that =>
    * Creates a checkbox input field
    */
   def checkbox: Formlet[Boolean] = new InnerFormlet[Boolean] {
-    val value = () => {
+    lazy val value = {
 
       val name = config.nameProvider.uniqueName()
 
@@ -239,7 +239,7 @@ trait BaseFormlet { that =>
    * component is the value associated with the option and the second is the label.
    */
   def select(options: List[(String, String)]): Formlet[String] = new InnerFormlet[String] {
-    val value = () => {
+    lazy val value = {
 
       val name = config.nameProvider.uniqueName()
 
@@ -264,7 +264,7 @@ trait BaseFormlet { that =>
    * the label.
    */
   def radio(options: List[(String, String)]): Formlet[Option[String]] = new InnerFormlet[Option[String]] {
-    val value = () => {
+    lazy val value = {
 
       val name = config.nameProvider.uniqueName()
 
