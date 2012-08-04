@@ -81,7 +81,7 @@ trait Formlet[A] { that =>
   import Types.{ Env, Names, Error }
 
   val config: FormletConfig
-  val value: () => (NodeSeq, Env => Either[Error, A], Names)
+  val value: (NodeSeq, Env => Either[Error, A], Names)
 
   private lazy val formName = that.config.nameProvider.uniqueName()
 
@@ -96,10 +96,10 @@ trait Formlet[A] { that =>
    * TODO: Write documentation
    */
   def <*>[X,Y](x: Formlet[X])(implicit ev: A <:< (X => Y)): Formlet[Y] = new InnerFormlet[Y] {
-    val value = () => {
+    lazy val value = {
 
-      val (xml,  func,  names)  = that.value()
-      val (xml2, func2, names2) = x.value()
+      val (xml,  func,  names)  = that.value
+      val (xml2, func2, names2) = x.value
 
       val f = (env: Env) => for {
         gFunc  <- func(env).right
@@ -115,7 +115,7 @@ trait Formlet[A] { that =>
    */
   def label(text: String): Formlet[A] = new InnerFormlet[A] {
     val value = () => {
-      val (xml, func, names) = that.value()
+      val (xml, func, names) = that.value
       (<label>{text}</label> ++ xml, func, names)
     }
   }
@@ -126,7 +126,7 @@ trait Formlet[A] { that =>
    */
   def validate( f: A => Option[Error]): Formlet[A] = new InnerFormlet[A] {
     val value = () => {
-      val (html, func, names) = that.value()
+      val (html, func, names) = that.value
       val g = (env: Env) => func(env).right.flatMap( v => f(v).map(Left(_)).getOrElse(Right(v)) )
       (html, g, names)
     }
@@ -137,7 +137,7 @@ trait Formlet[A] { that =>
    */
   def map[B]( f: A => B): Formlet[B] = new InnerFormlet[B] {
     val value = () => {
-      val (html, func, names) = that.value()
+      val (html, func, names) = that.value
       val g = (env: Env) => func(env).right.map(f)
       (html, g, names)
     }
@@ -148,7 +148,7 @@ trait Formlet[A] { that =>
    */
   def xhtml: NodeSeq = {
 
-    val (html, func, names) = this.value()
+    val (html, func, names) = this.value
 
     <form>
       { html ++ <button type="submit" class="btn" name={{this.formName}}>Submit</button> }
@@ -161,7 +161,7 @@ trait Formlet[A] { that =>
    */
   def handler(f: Either[Error, A] => Unit) = {
 
-    val (html, func, names) = this.value()
+    val (html, func, names) = this.value
 
     config.handlerRegister.addHandler(this.formName, () => {
       val env = config.environmentProducer.createEnviornment(names)
