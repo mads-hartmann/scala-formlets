@@ -83,7 +83,7 @@ trait Formlet[A] { that =>
   val config: FormletConfig
   val value: (NodeSeq, Env => Either[Error, A], Names)
 
-  private lazy val formName = that.config.nameProvider.uniqueName()
+  lazy val formName = that.config.nameProvider.uniqueName()
 
   // TODO: Can I fix this in some way that doesn't require this inner formlet to pass
   //       down the configuration? Using the Reader Monad is tempting but I don't know

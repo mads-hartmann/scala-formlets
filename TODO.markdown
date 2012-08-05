@@ -1,6 +1,4 @@
 
-- Find ud af hvorfor at "name for input is: " bliver printet 4 gange når en form med 2 felter bliver
-  renderet!
 - Fix TODO's i speccen
 
 - Multiple submit buttons?
