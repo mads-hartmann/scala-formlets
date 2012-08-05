@@ -11,22 +11,44 @@ import net.liftweb.json.JsonAST._
 
 class LiftBackendSpec extends WebSpec2(new Boot().boot _) {
 
-  val (_, _, names) = form.value
-  val values  = List("Mads","Hartmann")
-  val tuples  = names zip values
-  val jfields = tuples map { case (k,v) => JField(k,v) }
-  val jobj    = JObject(JField(form.formName, "") :: jfields)
-  val testUrl = "http://localhost:8080"
+  "LiftBackendSpec" should {
 
-  val testSession = MockWeb.testS(testUrl) {
-    S.session
-  }
+    sequential
 
-  "When submitting the form it invokes the function with the input" withReqFor(testUrl) withPost(jobj) in {
-    req => {
-      Result.is must_== Person("Mads","Hartmann")
+    val (_, _, names) = form.value
+    val formName      = form.formName
+    val values        = List("Mads", "Hartmann")
+    val tuples        = (formName, "a") :: (names zip values)
+    val testUrl       = "/index"
+    val purl          = tuples.reverse.map { case (k, v) => "%s=%s".format(k, v) }.mkString("&")
+    val fullurl       = "/?" + purl
+
+    val preq = new MockHttpServletRequest(fullurl, "")
+    preq.parameters = tuples
+    preq.method = "POST"
+    preq.contentType = "application/x-www-form-urlencoded"
+
+    val testSession = MockWeb.testS(testUrl) { S.session }
+
+    ("Rendering a formlet should add the handler to the functionMap of the session"
+    withTemplateFor (testUrl, testSession)) in {
+      req => {
+        S.functionMap.contains(formName) must_== (true)
+      }
     }
-  }
 
+    // This is perhabs more of a test of my WebSpec but regardless it's still
+    // important. Especially because it currently fails!
+    ("When reundering an unrelevant page the functionMap should be unchanged"
+    withTemplateFor ("/other", testSession)) in { req => {
+      S.functionMap.contains(formName) must_== (true)
+    }}
+
+    ("When submitting a formlet it should invoke the handler"
+     withSFor(preq, testSession)) in {
+       Result.is must_== Person("Mads", "Hartmann")
+     }
+
+  }
 
 }

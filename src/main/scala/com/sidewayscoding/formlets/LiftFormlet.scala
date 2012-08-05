@@ -12,6 +12,7 @@ object LiftNameProvider extends NameProvider {
 object LiftHandlerRegister extends HandlerRegister {
   import net.liftweb.http.{ S }
   def addHandler(name: String, f: () => Unit): Unit = {
+    println("adding handler: " + S.session)
     S.addFunctionMap(name, f)
   }
 }

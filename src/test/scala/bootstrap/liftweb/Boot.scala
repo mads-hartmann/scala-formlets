@@ -20,7 +20,10 @@ class Boot {
     LiftRules.addToPackages("com.sidewayscoding.formlets.lift")
 
     // Build SiteMap
-    val entries = List(Menu.i("Home") / "index")
+    val entries = List(
+      Menu.i("Home") / "index",
+      Menu.i("Other") / "other"
+    )
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
